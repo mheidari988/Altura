@@ -1,0 +1,6 @@
+@AlturaCMS.Backend.API_HostAddress = http://localhost:5230
+
+GET {{AlturaCMS.Backend.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
