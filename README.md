@@ -20,7 +20,6 @@ AlturaCMS is a dynamic and flexible Content Management System built with ASP.NET
 
 - [.NET Core SDK](https://dotnet.microsoft.com/download)
 - [Node.js](https://nodejs.org/) and npm
-- [PostgreSQL](https://www.postgresql.org/)
 
 ### Installation
 
@@ -28,21 +27,6 @@ AlturaCMS is a dynamic and flexible Content Management System built with ASP.NET
    ```sh
    git clone https://github.com/yourusername/AlturaCMS.git
    cd AlturaCMS
-   ```
-
-2. **Backend Setup**:
-   ```sh
-   cd backend
-   dotnet restore
-   dotnet ef database update
-   dotnet run
-   ```
-
-3. **Frontend Setup**:
-   ```sh
-   cd ../frontend
-   npm install
-   dotnet run
    ```
 
 ### Usage
@@ -96,7 +80,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-If you have any questions or suggestions, feel free to contact us at [your-email@example.com].
+If you have any questions or suggestions, feel free to contact us at [reza@heidari.io].
 
 ---
 
