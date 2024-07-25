@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlturaCMS.Application.ContentTypes.Handlers;
-internal class GetContentTypeByIdHandler
+namespace AlturaCMS.Application.Features.Forms.Queries;
+internal class GetFormByIdQuery
 {
 }

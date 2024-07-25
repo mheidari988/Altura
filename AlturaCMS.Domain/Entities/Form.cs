@@ -14,9 +14,9 @@ namespace AlturaCMS.Domain.Entities
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the collection of fields for the form.
+        /// Gets or sets the collection of form fields for the form.
         /// </summary>
         /// <value>The collection of fields for the form.</value>
-        public ICollection<FormField> Fields { get; set; } = [];
+        public ICollection<FormField> FormFields { get; set; } = [];
     }
 }

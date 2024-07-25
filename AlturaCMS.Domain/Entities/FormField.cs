@@ -17,7 +17,7 @@ namespace AlturaCMS.Domain.Entities
         /// Gets or sets the type of the form field.
         /// </summary>
         /// <value>The type of the form field.</value>
-        public AttributeType Type { get; set; }
+        public FieldType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the validation rules for the form field.

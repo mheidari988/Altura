@@ -14,9 +14,9 @@ namespace AlturaCMS.Domain.Entities
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the collection of attributes for the content type.
+        /// Gets or sets the collection of fields for the content type.
         /// </summary>
-        /// <value>The collection of attributes for the content type.</value>
-        public ICollection<ContentTypeAttribute> Attributes { get; set; } = new List<ContentTypeAttribute>();
+        /// <value>The collection of fields for the content type.</value>
+        public ICollection<ContentTypeField> Fields { get; set; } = [];
     }
 }
