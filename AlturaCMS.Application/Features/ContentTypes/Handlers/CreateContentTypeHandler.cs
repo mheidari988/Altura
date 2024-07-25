@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlturaCMS.Application.ContentTypes.Commands;
-internal class UpdateContentTypeCommand
+namespace AlturaCMS.Application.Features.ContentTypes.Handlers;
+internal class CreateContentTypeHandler
 {
 }

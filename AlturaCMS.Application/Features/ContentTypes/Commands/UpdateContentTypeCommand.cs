@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlturaCMS.Application.Forms.Queries;
-internal class GetFormByIdQuery
+namespace AlturaCMS.Application.Features.ContentTypes.Commands;
+internal class UpdateContentTypeCommand
 {
 }
