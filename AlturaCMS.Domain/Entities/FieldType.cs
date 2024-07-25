@@ -1,47 +1,47 @@
 ﻿namespace AlturaCMS.Domain.Entities
 {
     /// <summary>
-    /// Represents the types of attributes that can be used in AlturaCMS.
+    /// Represents the types of fields that can be used in AlturaCMS.
     /// </summary>
-    public enum AttributeType
+    public enum FieldType
     {
         /// <summary>
-        /// A plain text attribute.
+        /// A plain text field.
         /// </summary>
         Text,
 
         /// <summary>
-        /// A rich text attribute that supports formatting.
+        /// A rich text field that supports formatting.
         /// </summary>
         RichText,
 
         /// <summary>
-        /// A numeric attribute.
+        /// A numeric field.
         /// </summary>
         Number,
 
         /// <summary>
-        /// A checkbox attribute.
+        /// A checkbox field.
         /// </summary>
         Checkbox,
 
         /// <summary>
-        /// A date and time attribute.
+        /// A date and time field.
         /// </summary>
         DateTime,
 
         /// <summary>
-        /// A file attribute for uploading files.
+        /// A file field for uploading files.
         /// </summary>
         File,
 
         /// <summary>
-        /// A single select attribute.
+        /// A single select field.
         /// </summary>
         Select,
 
         /// <summary>
-        /// A multi-select attribute that allows multiple selections.
+        /// A multi-select field that allows multiple selections.
         /// </summary>
         MultiSelect
     }
