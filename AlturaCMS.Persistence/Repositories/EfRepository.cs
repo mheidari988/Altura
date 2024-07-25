@@ -2,6 +2,8 @@
 using AlturaCMS.Domain.Specifications;
 using AlturaCMS.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
 
 namespace AlturaCMS.Persistence.Repositories
 {
@@ -9,21 +11,16 @@ namespace AlturaCMS.Persistence.Repositories
     /// Represents a repository for managing entities using Entity Framework.
     /// </summary>
     /// <typeparam name="T">The type of the entity managed by the repository.</typeparam>
-    public class EfRepository<T> : IAsyncRepository<T> where T : BaseEntity
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="EfRepository{T}"/> class.
+    /// </remarks>
+    /// <param name="dbContext">The database context.</param>
+    public class EfRepository<T>(ApplicationDbContext dbContext) : IAsyncRepository<T> where T : BaseEntity
     {
         /// <summary>
         /// The database context.
         /// </summary>
-        protected readonly ApplicationDbContext _dbContext;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EfRepository{T}"/> class.
-        /// </summary>
-        /// <param name="dbContext">The database context.</param>
-        public EfRepository(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        protected readonly ApplicationDbContext DbContext = dbContext;
 
         /// <summary>
         /// Gets an entity by its identifier asynchronously.
@@ -32,7 +29,7 @@ namespace AlturaCMS.Persistence.Repositories
         /// <returns>A task that represents the asynchronous operation. The task result contains the entity if found; otherwise, null.</returns>
         public async Task<T?> GetByIdAsync(Guid id)
         {
-            return await _dbContext.Set<T>().FindAsync(id);
+            return await DbContext.Set<T>().FindAsync(id);
         }
 
         /// <summary>
@@ -41,7 +38,7 @@ namespace AlturaCMS.Persistence.Repositories
         /// <returns>A task that represents the asynchronous operation. The task result contains a read-only list of entities.</returns>
         public async Task<IReadOnlyList<T>> ListAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await DbContext.Set<T>().ToListAsync();
         }
 
         /// <summary>
@@ -55,13 +52,54 @@ namespace AlturaCMS.Persistence.Repositories
         }
 
         /// <summary>
+        /// Gets a read-only list of entities that match the specified criteria asynchronously.
+        /// </summary>
+        /// <param name="predicate">The expression that defines the criteria for selecting entities.</param>
+        /// <param name="include">The function to include related entities.</param>
+        /// <param name="orderBy">The function to order the entities.</param>
+        /// <param name="skip">The number of entities to skip.</param>
+        /// <param name="take">The number of entities to take.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a read-only list of entities that match the specified criteria.</returns>
+        public async Task<IReadOnlyList<T>> ListAsync(
+            Expression<Func<T, bool>> predicate,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null!,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null!,
+            int? skip = null,
+            int? take = null)
+        {
+            IQueryable<T> query = DbContext.Set<T>();
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            if (skip.HasValue && take.HasValue)
+            {
+                query = query.Skip(skip.Value).Take(take.Value);
+            }
+
+            return await query.ToListAsync();
+        }
+
+        /// <summary>
         /// Adds a new entity to the repository asynchronously.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the added entity.</returns>
         public async Task<T> AddAsync(T entity)
         {
-            await _dbContext.Set<T>().AddAsync(entity);
+            await DbContext.Set<T>().AddAsync(entity);
             return entity;
         }
 
@@ -72,8 +110,8 @@ namespace AlturaCMS.Persistence.Repositories
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task UpdateAsync(T entity)
         {
-            _dbContext.Entry(entity).OriginalValues["RowVersion"] = entity.RowVersion;
-            _dbContext.Set<T>().Update(entity);
+            DbContext.Entry(entity).OriginalValues["RowVersion"] = entity.RowVersion;
+            DbContext.Set<T>().Update(entity);
             return Task.CompletedTask;
         }
 
@@ -84,7 +122,7 @@ namespace AlturaCMS.Persistence.Repositories
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task DeleteAsync(T entity)
         {
-            _dbContext.Set<T>().Remove(entity);
+            DbContext.Set<T>().Remove(entity);
             return Task.CompletedTask;
         }
 
@@ -95,52 +133,7 @@ namespace AlturaCMS.Persistence.Repositories
         /// <returns>The modified queryable entity set.</returns>
         private IQueryable<T> ApplySpecification(ISpecification<T> spec)
         {
-            return SpecificationEvaluator<T>.GetQuery(_dbContext.Set<T>().AsQueryable(), spec);
-        }
-    }
-
-    /// <summary>
-    /// Evaluates specifications to apply them to queryable entity sets.
-    /// </summary>
-    /// <typeparam name="T">The type of the entity to which the specification applies.</typeparam>
-    public class SpecificationEvaluator<T> where T : BaseEntity
-    {
-        /// <summary>
-        /// Applies the specification to the queryable entity set.
-        /// </summary>
-        /// <param name="inputQuery">The initial queryable entity set.</param>
-        /// <param name="spec">The specification that defines the criteria for selecting entities.</param>
-        /// <returns>The modified queryable entity set.</returns>
-        public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, ISpecification<T> spec)
-        {
-            var query = inputQuery;
-
-            // Modify the IQueryable using the specification's criteria expression
-            if (spec.Criteria != null)
-            {
-                query = query.Where(spec.Criteria);
-            }
-
-            // Includes all expression-based includes
-            query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
-
-            // Apply ordering if expressions are set
-            if (spec.OrderBy != null)
-            {
-                query = query.OrderBy(spec.OrderBy);
-            }
-            else if (spec.OrderByDescending != null)
-            {
-                query = query.OrderByDescending(spec.OrderByDescending);
-            }
-
-            // Apply paging if enabled
-            if (spec.IsPagingEnabled)
-            {
-                query = query.Skip(spec.Skip).Take(spec.Take);
-            }
-
-            return query;
+            return SpecificationEvaluator<T>.GetQuery(DbContext.Set<T>().AsQueryable(), spec);
         }
     }
 }

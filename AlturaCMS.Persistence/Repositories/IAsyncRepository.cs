@@ -1,5 +1,7 @@
 ﻿using AlturaCMS.Domain.Common;
 using AlturaCMS.Domain.Specifications;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
 
 namespace AlturaCMS.Persistence.Repositories
 {
@@ -28,6 +30,13 @@ namespace AlturaCMS.Persistence.Repositories
         /// <param name="spec">The specification that defines the criteria for selecting entities.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a read-only list of entities that match the specified criteria.</returns>
         Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec);
+
+        Task<IReadOnlyList<T>> ListAsync(
+            Expression<Func<T, bool>> predicate,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null!,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null!,
+            int? skip = null,
+            int? take = null);
 
         /// <summary>
         /// Adds a new entity to the repository asynchronously.
