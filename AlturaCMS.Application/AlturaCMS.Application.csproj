@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AlturaCMS.Persistence\AlturaCMS.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>
