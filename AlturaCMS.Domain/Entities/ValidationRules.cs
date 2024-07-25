@@ -1,9 +1,11 @@
-﻿namespace AlturaCMS.Domain.Entities
+﻿using AlturaCMS.Domain.Common;
+
+namespace AlturaCMS.Domain.Entities
 {
     /// <summary>
     /// Represents the validation rules for an field or form field in the AlturaCMS domain.
     /// </summary>
-    public class ValidationRules
+    public class ValidationRules : BaseEntity
     {
         /// <summary>
         /// Gets or sets a value indicating whether the field or form field is required.
