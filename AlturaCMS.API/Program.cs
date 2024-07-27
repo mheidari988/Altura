@@ -3,6 +3,8 @@ using AlturaCMS.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddPersistence(builder.Configuration);
 
