@@ -62,8 +62,8 @@ namespace AlturaCMS.Persistence.Repositories
         /// <returns>A task that represents the asynchronous operation. The task result contains a read-only list of entities that match the specified criteria.</returns>
         public async Task<IReadOnlyList<T>> ListAsync(
             Expression<Func<T, bool>> predicate,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null!,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null!,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             int? skip = null,
             int? take = null)
         {

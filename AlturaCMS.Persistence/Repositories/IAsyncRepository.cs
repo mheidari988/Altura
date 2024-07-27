@@ -33,8 +33,8 @@ namespace AlturaCMS.Persistence.Repositories
 
         Task<IReadOnlyList<T>> ListAsync(
             Expression<Func<T, bool>> predicate,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null!,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null!,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             int? skip = null,
             int? take = null);
 
