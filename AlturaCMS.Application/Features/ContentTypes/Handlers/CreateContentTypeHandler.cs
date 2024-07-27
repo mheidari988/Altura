@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlturaCMS.Domain.Entities;
-internal class Attribute
+namespace AlturaCMS.Application.Features.ContentTypes.Handlers;
+internal class CreateContentTypeHandler
 {
 }
