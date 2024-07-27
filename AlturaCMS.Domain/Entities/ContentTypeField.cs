@@ -27,6 +27,6 @@
         /// Gets or sets the field.
         /// </summary>
         /// <value>The field associated with this content type.</value>
-        public Field Attribute { get; set; } = new();
+        public Field Field { get; set; } = new();
     }
 }
