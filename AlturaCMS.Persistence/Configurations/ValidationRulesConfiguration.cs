@@ -1,21 +1,14 @@
 ﻿using AlturaCMS.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using AlturaCMS.Persistence.Configurations.Common;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AlturaCMS.Persistence.Configurations
 {
-    /// <summary>
-    /// Configures the <see cref="ValidationRules"/> entity.
-    /// </summary>
-    public class ValidationRulesConfiguration : IEntityTypeConfiguration<ValidationRules>
+    public class ValidationRulesConfiguration : BaseEntityConfiguration<ValidationRules>
     {
-        /// <summary>
-        /// Configures the entity of type <see cref="ValidationRules"/>.
-        /// </summary>
-        /// <param name="builder">The builder to be used to configure the entity.</param>
-        public void Configure(EntityTypeBuilder<ValidationRules> builder)
+        public override void Configure(EntityTypeBuilder<ValidationRules> builder)
         {
             builder.HasKey(e => e.Id);
             builder.Property(e => e.RegexPattern)

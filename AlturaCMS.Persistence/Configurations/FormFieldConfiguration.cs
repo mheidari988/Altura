@@ -1,11 +1,12 @@
 ﻿using AlturaCMS.Domain.Entities;
+using AlturaCMS.Persistence.Configurations.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AlturaCMS.Persistence.Configurations;
-public class FormFieldConfiguration : IEntityTypeConfiguration<FormField>
+public class FormFieldConfiguration : BaseEntityConfiguration<FormField>
 {
-    public void Configure(EntityTypeBuilder<FormField> builder)
+    public override void Configure(EntityTypeBuilder<FormField> builder)
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Name)
