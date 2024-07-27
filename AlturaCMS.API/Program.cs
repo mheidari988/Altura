@@ -1,4 +1,10 @@
+using AlturaCMS.Application;
+using AlturaCMS.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApplication(builder.Configuration);
+builder.Services.AddPersistence(builder.Configuration);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

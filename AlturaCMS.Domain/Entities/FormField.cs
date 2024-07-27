@@ -20,6 +20,12 @@ namespace AlturaCMS.Domain.Entities
         public FieldType Type { get; set; }
 
         /// <summary>
+        /// Gets or sets the ID of the ValidationRules.
+        /// </summary>
+        /// <value>The ID of the ValidationRules.</value>
+        public Guid ValidationRulesId { get; set; }
+
+        /// <summary>
         /// Gets or sets the validation rules for the form field.
         /// </summary>
         /// <value>The validation rules for the form field.</value>
