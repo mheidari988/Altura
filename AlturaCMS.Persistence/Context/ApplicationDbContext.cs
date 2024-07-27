@@ -2,6 +2,7 @@
 using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace AlturaCMS.Persistence.Context;
@@ -30,28 +31,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new FormFieldConfiguration());
         modelBuilder.ApplyConfiguration(new ValidationRulesConfiguration());
 
-        // Soft delete and concurrency control configurations
+        // Apply soft delete and concurrency control configurations
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
             {
-                var methodInfo = typeof(EF).GetMethod("Property", [typeof(object), typeof(string)])
-                    ?? throw new InvalidOperationException("The 'Property' method is not found.");
+                var entityBuilder = modelBuilder.Entity(entityType.ClrType);
 
-                var isDeletedPropertyMethod = methodInfo.MakeGenericMethod(typeof(bool));
+                // Apply the query filter for soft delete
+                entityBuilder.HasQueryFilter(ConvertFilterExpression<BaseEntity>(e => !e.IsDeleted));
 
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
-                var propertyMethodCall = Expression.Call(isDeletedPropertyMethod, parameter, Expression.Constant("IsDeleted"));
-                var falseConstant = Expression.Constant(false);
-                var comparison = Expression.MakeBinary(ExpressionType.Equal, propertyMethodCall, falseConstant);
-                var lambda = Expression.Lambda(comparison, parameter);
-
-                modelBuilder.Entity(entityType.ClrType)
-                    .HasQueryFilter(lambda);
-
-                modelBuilder.Entity(entityType.ClrType)
-                    .Property<byte[]>("RowVersion")
-                    .IsRowVersion();
+                // Apply concurrency token
+                entityBuilder.Property<byte[]>("RowVersion").IsRowVersion();
             }
         }
     }
@@ -77,5 +68,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         }
 
         return base.SaveChanges();
+    }
+
+    private static LambdaExpression ConvertFilterExpression<T>(Expression<Func<T, bool>> filterExpression)
+    {
+        var parameter = Expression.Parameter(typeof(T));
+        var newExpression = ReplacingExpressionVisitor.Replace(filterExpression.Parameters.Single(), parameter, filterExpression.Body);
+        return Expression.Lambda(newExpression, parameter);
     }
 }
