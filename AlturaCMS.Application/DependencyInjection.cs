@@ -11,7 +11,7 @@ public static class DependencyInjection
         services.AddScoped<IFieldService, FieldService>();
         services.AddScoped<IFormFieldService, FormFieldService>();
         services.AddScoped<IFormService, FormService>();
-        services.AddScoped<IValidationRulesService, ValidationRulesService>();
+        services.AddScoped<IDynamicTableService, DynamicTableService>();
 
         return services;
     }
