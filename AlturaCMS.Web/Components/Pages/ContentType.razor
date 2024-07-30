@@ -1,0 +1,27 @@
+﻿@page "/content-type/{id:int}"
+@rendermode InteractiveServer
+@using AlturaCMS.Web.DataModels
+@using AlturaCMS.Web.Services
+@inject MenuService MenuService
+
+@if (menuItem == null)
+{
+    <h1>Loading...</h1>
+}
+else
+{
+    <h3>ContentType : @menuItem.Title</h3>
+}
+
+@code {
+    MenuItem? menuItem;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var menuItems = await MenuService.GetMenuItems();
+        menuItem = menuItems.FirstOrDefault(x => x.Id == Id);
+    }
+}
