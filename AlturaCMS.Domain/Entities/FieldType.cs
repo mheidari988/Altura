@@ -21,6 +21,11 @@
         Number,
 
         /// <summary>
+        /// A field that stores decimal numbers.
+        /// </summary>
+        Currency,
+
+        /// <summary>
         /// A checkbox field.
         /// </summary>
         Checkbox,
