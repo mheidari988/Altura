@@ -17,7 +17,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ContentTypeField> ContentTypeFields { get; set; }
     public DbSet<Form> Forms { get; set; }
     public DbSet<FormField> FormFields { get; set; }
-    public DbSet<ValidationRules> ValidationRules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,7 +28,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new ContentTypeFieldConfiguration());
         modelBuilder.ApplyConfiguration(new FormConfiguration());
         modelBuilder.ApplyConfiguration(new FormFieldConfiguration());
-        modelBuilder.ApplyConfiguration(new ValidationRulesConfiguration());
 
         // Apply soft delete and concurrency control configurations
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())

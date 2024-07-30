@@ -1,6 +1,5 @@
 ﻿using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Configurations.Common;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AlturaCMS.Persistence.Configurations;
@@ -12,9 +11,5 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(100);
-        builder.HasOne(e => e.ValidationRules)
-            .WithMany()
-            .HasForeignKey(e => e.ValidationRulesId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

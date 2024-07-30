@@ -12,10 +12,6 @@ public class FormFieldConfiguration : BaseEntityConfiguration<FormField>
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(100);
-        builder.HasOne(e => e.ValidationRules)
-            .WithMany()
-            .HasForeignKey(e => e.ValidationRulesId)
-            .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(e => e.Form)
             .WithMany(f => f.FormFields)
             .HasForeignKey(e => e.FormId)
