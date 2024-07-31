@@ -7,6 +7,7 @@ public class ContentTypeFieldConfiguration : IEntityTypeConfiguration<ContentTyp
 {
     public void Configure(EntityTypeBuilder<ContentTypeField> builder)
     {
+        builder.ToTable("ContentTypeFields", "Meta");
         builder.HasKey(e => new { e.ContentTypeId, e.FieldId });
 
         builder.HasOne(e => e.ContentType)

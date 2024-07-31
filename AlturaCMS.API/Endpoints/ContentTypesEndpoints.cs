@@ -1,4 +1,5 @@
 ﻿using AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
+using AlturaCMS.Application.Features.ContentTypes.Queries.GetContentTypes;
 using MediatR;
 
 namespace AlturaCMS.API.Endpoints;
@@ -20,5 +21,11 @@ public static class ContentTypesEndpoints
             var result = await mediator.Send(command);
             return Results.Created($"/api/contenttypes/{result.Id}", result);
         }).WithName("CreateContentType").WithOpenApi();
+
+        endpoints.MapGet("/api/contenttypes", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetContentTypesQuery());
+            return Results.Ok(result);
+        }).WithName("GetContentTypes").WithOpenApi();
     }
 }
