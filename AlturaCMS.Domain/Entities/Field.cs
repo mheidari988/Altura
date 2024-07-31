@@ -32,6 +32,12 @@ namespace AlturaCMS.Domain.Entities
         public bool IsRequired { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the field or form field is unique.
+        /// </summary>
+        /// <value><c>true</c> if the field or form field is unique; otherwise, <c>false</c>.</value>
+        public bool IsUnique { get; set; }
+
+        /// <summary>
         /// Gets or sets the minimum length of the field or form field.
         /// </summary>
         /// <value>The minimum length of the field or form field.</value>
@@ -47,13 +53,25 @@ namespace AlturaCMS.Domain.Entities
         /// Gets or sets the minimum value of the field or form field.
         /// </summary>
         /// <value>The minimum value of the field or form field.</value>
-        public int? MinValue { get; set; }
+        public decimal? MinValue { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum value of the field or form field.
         /// </summary>
         /// <value>The maximum value of the field or form field.</value>
-        public int? MaxValue { get; set; }
+        public decimal? MaxValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum date time of the DateTime FieldType or form field.
+        /// </summary>
+        /// <value>The minimum date time of the field or form field.</value>
+        public DateTime? MinDateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum date time of the DateTime FieldType or form field.
+        /// </summary>
+        /// <value>The maximum date time of the DateTime FieldType or form field.</value>
+        public DateTime? MaxDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the regular expression pattern for the field or form field.
