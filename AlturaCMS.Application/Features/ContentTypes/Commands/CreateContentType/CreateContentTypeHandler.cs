@@ -26,7 +26,22 @@ public class CreateContentTypeHandler(
 
         foreach (var fieldDto in request.Fields)
         {
-            var field = await fieldService.GetByIdAsync(fieldDto.FieldId);
+            // create field
+            var field = await fieldService.CreateAsync(new Field
+            {
+                Slug = fieldDto.Slug,
+                Name = fieldDto.Name,
+                DisplayName = fieldDto.DisplayName,
+                FieldType = fieldDto.FieldType,
+                IsRequired = fieldDto.IsRequired,
+                AllowedValues = fieldDto.AllowedValues,
+                MaxLength = fieldDto.MaxLength,
+                MinLength = fieldDto.MinLength,
+                MaxValue = fieldDto.MaxValue,
+                MinValue = fieldDto.MinValue,
+                RegexPattern = fieldDto.RegexPattern,
+            });
+
             if (field != null)
             {
                 contentType.Fields.Add(new ContentTypeField
@@ -38,7 +53,7 @@ public class CreateContentTypeHandler(
         }
 
         var createdContentType = await contentTypeService.CreateAsync(contentType) ?? throw new Exception("Failed to create content type");
-        dynamicTableService.CreateTable(createdContentType);
+        await dynamicTableService.CreateTableAsync(createdContentType);
 
         return new CreateContentTypeResponse
         {

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using AlturaCMS.Domain.Entities;
+using MediatR;
 
 namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
 public class CreateContentTypeCommand : IRequest<CreateContentTypeResponse>
@@ -9,5 +10,26 @@ public class CreateContentTypeCommand : IRequest<CreateContentTypeResponse>
 
 public class CreateContentTypeFieldDto
 {
-    public Guid FieldId { get; set; }
+    public string Slug { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public string DisplayName { get; set; } = string.Empty;
+
+    public FieldType FieldType { get; set; }
+
+    public bool IsRequired { get; set; }
+
+    public int? MinLength { get; set; }
+
+    public int? MaxLength { get; set; }
+
+    public int? MinValue { get; set; }
+
+    public int? MaxValue { get; set; }
+
+    public string? RegexPattern { get; set; } = string.Empty;
+
+    public List<string>? AllowedValues { get; set; } = [];
+
 }
