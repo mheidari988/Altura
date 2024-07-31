@@ -1,191 +1,128 @@
 ﻿using AlturaCMS.Domain.Entities;
-using AlturaCMS.Persistence.Context;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace AlturaCMS.Application.Services.Persistence;
-
-public class DynamicTableService(ApplicationDbContext context) : IDynamicTableService
+public class DynamicTableService : IDynamicTableService
 {
-    public void CreateTable(ContentType contentType)
+    private readonly string _connectionString;
+
+    public DynamicTableService(IConfiguration configuration)
     {
-        var modelBuilder = InitializeModelBuilder();
-        ConfigureEntity(modelBuilder.Entity(contentType.Name), contentType.Fields);
-        ApplyModelChanges(modelBuilder);
+        _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public void AlterTable(ContentType contentType)
+    public async Task CreateTableAsync(ContentType contentType)
     {
-        var modelBuilder = InitializeModelBuilder();
-        var entityTypeBuilder = modelBuilder.Entity(contentType.Name);
+        var createTableScript = GenerateCreateTableScript(contentType);
 
-        var existingFields = context.Model.FindEntityType(contentType.Name)?.GetProperties()
-                                            .Select(p => p.Name).ToList();
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var command = new SqlCommand(createTableScript, connection);
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private string GenerateCreateTableScript(ContentType contentType)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"CREATE TABLE [{contentType.Name}] (");
+        sb.AppendLine("[Id] UNIQUEIDENTIFIER PRIMARY KEY,"); // Assuming each table has an Id column
 
         foreach (var field in contentType.Fields)
         {
-            if (existingFields == null || !existingFields.Contains(field.Field.Slug))
+            sb.AppendLine(GenerateFieldScript(field.Field));
+        }
+
+        sb.AppendLine(");");
+
+        foreach (var field in contentType.Fields)
+        {
+            if (field.Field.FieldType == FieldType.MultiSelect)
             {
-                ConfigureField(entityTypeBuilder, field);
+                sb.AppendLine(GeneratePivotTableScript(contentType.Name, field.Field));
             }
         }
 
-        ApplyModelChanges(modelBuilder);
+        return sb.ToString();
     }
 
-    private static ModelBuilder InitializeModelBuilder() => new(new ConventionSet());
-
-    private void ConfigureEntity(EntityTypeBuilder entityTypeBuilder, IEnumerable<ContentTypeField> fields)
+    private string GenerateFieldScript(Field field)
     {
-        foreach (var field in fields)
+        var fieldType = field.FieldType switch
         {
-            ConfigureField(entityTypeBuilder, field);
-        }
-    }
+            FieldType.Text => "NVARCHAR(MAX)",
+            FieldType.RichText => "NVARCHAR(MAX)",
+            FieldType.Number => "INT",
+            FieldType.Currency => "DECIMAL(18, 2)",
+            FieldType.Checkbox => "BIT",
+            FieldType.DateTime => "DATETIME",
+            FieldType.File => "NVARCHAR(MAX)",
+            FieldType.Select => "UNIQUEIDENTIFIER", // Assuming it references another table
+            FieldType.MultiSelect => null, // Handled separately
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
-    private void ConfigureField(EntityTypeBuilder entityTypeBuilder, ContentTypeField contentTypeField)
-    {
-        Field field = contentTypeField.Field ?? throw new ArgumentNullException(nameof(contentTypeField.Field));
-        var propertyBuilder = entityTypeBuilder.Property(field.Slug);
-
-        switch (field.Type)
+        if (fieldType == null)
         {
-            case FieldType.Text:
-                ConfigureTextField(propertyBuilder, field);
-                break;
-            case FieldType.Number:
-                ConfigureNumberField(propertyBuilder, field);
-                break;
-            case FieldType.Currency:
-                propertyBuilder.HasColumnType("decimal(18,2)");
-                break;
-            case FieldType.DateTime:
-                propertyBuilder.HasColumnType("datetime");
-                break;
-            case FieldType.Checkbox:
-                propertyBuilder.HasColumnType("bit");
-                break;
-            case FieldType.Select:
-                ConfigureSelectField(entityTypeBuilder, propertyBuilder, field);
-                break;
-            case FieldType.MultiSelect:
-                CreatePivotTable(entityTypeBuilder, contentTypeField.ContentType!.Name, field);
-                break;
-            case FieldType.File:
-                propertyBuilder.HasColumnType("varchar(255)");
-                break;
+            return string.Empty;
         }
 
-        ApplyCommonFieldConfigurations(propertyBuilder, field);
-    }
+        var sb = new StringBuilder();
+        sb.Append($"[{field.Name}] {fieldType}");
 
-    private void ConfigureTextField(PropertyBuilder propertyBuilder, Field field)
-    {
-        propertyBuilder.HasMaxLength(field.MaxLength ?? 255).HasColumnType("nvarchar");
-    }
-
-    private void ConfigureNumberField(PropertyBuilder propertyBuilder, Field field)
-    {
-        propertyBuilder.HasColumnType("int");
-
-        if (field.MinValue.HasValue)
-            propertyBuilder.HasAnnotation("Min", field.MinValue.Value);
-
-        if (field.MaxValue.HasValue)
-            propertyBuilder.HasAnnotation("Max", field.MaxValue.Value);
-    }
-
-    private void ConfigureSelectField(EntityTypeBuilder entityTypeBuilder, PropertyBuilder propertyBuilder, Field field)
-    {
-        propertyBuilder.HasColumnType("int");
-
-        if (!string.IsNullOrWhiteSpace(field.Slug))
-        {
-            entityTypeBuilder.HasOne(field.Slug)
-                             .WithMany()
-                             .HasForeignKey(field.Slug);
-        }
-    }
-
-    private void ApplyCommonFieldConfigurations(PropertyBuilder propertyBuilder, Field field)
-    {
         if (field.IsRequired)
         {
-            propertyBuilder.IsRequired();
+            sb.Append(" NOT NULL");
         }
+
+        var checkConstraints = new List<string>();
 
         if (field.MinLength.HasValue)
         {
-            propertyBuilder.HasAnnotation("MinLength", field.MinLength.Value);
+            checkConstraints.Add($"LEN([{field.Name}]) >= {field.MinLength.Value}");
         }
 
         if (field.MaxLength.HasValue)
         {
-            propertyBuilder.HasAnnotation("MaxLength", field.MaxLength.Value);
+            checkConstraints.Add($"LEN([{field.Name}]) <= {field.MaxLength.Value}");
         }
-    }
 
-    private void CreatePivotTable(EntityTypeBuilder entityTypeBuilder, string contentTypeName, Field field)
-    {
-        var otherEntityName = field.Slug; // Assuming Slug is used as the related entity name
-        var pivotTableName = string.Compare(contentTypeName, otherEntityName, StringComparison.OrdinalIgnoreCase) < 0
-            ? $"{contentTypeName}{otherEntityName}"
-            : $"{otherEntityName}{contentTypeName}";
-
-        var modelBuilder = InitializeModelBuilder();
-        var pivotEntityTypeBuilder = modelBuilder.Entity(pivotTableName);
-
-        pivotEntityTypeBuilder.Property<Guid>("Id").ValueGeneratedOnAdd();
-        pivotEntityTypeBuilder.Property<Guid>($"{contentTypeName}Id");
-        pivotEntityTypeBuilder.Property<Guid>($"{otherEntityName}Id");
-
-        pivotEntityTypeBuilder.HasKey("Id");
-
-        pivotEntityTypeBuilder.HasOne(entityTypeBuilder.Metadata.ClrType)
-                              .WithMany()
-                              .HasForeignKey($"{contentTypeName}Id");
-
-        pivotEntityTypeBuilder.HasOne(field.Slug)
-                              .WithMany()
-                              .HasForeignKey($"{otherEntityName}Id");
-
-        ApplyPivotTableModelChanges(modelBuilder, pivotTableName, entityTypeBuilder.Metadata.ClrType, field.Slug);
-    }
-
-    private void ApplyPivotTableModelChanges(ModelBuilder modelBuilder, string pivotTableName, Type ownerClrType, string relatedEntityName)
-    {
-        var compiledModel = modelBuilder.FinalizeModel();
-        using var dynamicContext = new DynamicDbContext(context.Database.GetDbConnection().ConnectionString, modelBuilder =>
+        if (field.MinValue.HasValue)
         {
-            modelBuilder.Entity(pivotTableName).HasKey("Id");
-            modelBuilder.Entity(pivotTableName).HasOne(ownerClrType)
-                                               .WithMany()
-                                               .HasForeignKey($"{ownerClrType.Name}Id");
+            checkConstraints.Add($"[{field.Name}] >= {field.MinValue.Value}");
+        }
 
-            modelBuilder.Entity(pivotTableName).HasOne(relatedEntityName)
-                                               .WithMany()
-                                               .HasForeignKey($"{relatedEntityName}Id");
-        });
-        dynamicContext.Database.EnsureCreated();
+        if (field.MaxValue.HasValue)
+        {
+            checkConstraints.Add($"[{field.Name}] <= {field.MaxValue.Value}");
+        }
+
+        if (!string.IsNullOrEmpty(field.RegexPattern))
+        {
+            checkConstraints.Add($"[{field.Name}] LIKE '{field.RegexPattern}'");
+        }
+
+        if (checkConstraints.Count > 0)
+        {
+            sb.Append(" CHECK (" + string.Join(" AND ", checkConstraints) + ")");
+        }
+
+        sb.Append(",");
+
+        return sb.ToString();
     }
 
-    private void ApplyModelChanges(ModelBuilder modelBuilder)
+
+    private string GeneratePivotTableScript(string contentTypeName, Field field)
     {
-        var compiledModel = modelBuilder.FinalizeModel();
-        using var dynamicContext = new DynamicDbContext(context.Database.GetDbConnection().ConnectionString, modelBuilder =>
-        {
-            compiledModel.GetEntityTypes().ToList().ForEach(entityType =>
-            {
-                modelBuilder.Entity(entityType.Name, entity =>
-                {
-                    foreach (var property in entityType.GetProperties())
-                    {
-                        entity.Property(property.ClrType, property.Name);
-                    }
-                });
-            });
-        });
-        dynamicContext.Database.EnsureCreated();
+        var pivotTableName = $"{contentTypeName}_{field.Name}";
+        return $@"
+CREATE TABLE [{pivotTableName}] (
+    [{contentTypeName}Id] UNIQUEIDENTIFIER REFERENCES [{contentTypeName}]([Id]),
+    [{field.Name}Id] UNIQUEIDENTIFIER,
+    PRIMARY KEY ([{contentTypeName}Id], [{field.Name}Id])
+);";
     }
 }
