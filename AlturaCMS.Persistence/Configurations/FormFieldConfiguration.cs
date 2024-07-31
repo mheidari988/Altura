@@ -8,10 +8,11 @@ public class FormFieldConfiguration : BaseEntityConfiguration<FormField>
 {
     public override void Configure(EntityTypeBuilder<FormField> builder)
     {
+        builder.ToTable("FormFields", "Meta");
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(500);
         builder.HasOne(e => e.Form)
             .WithMany(f => f.FormFields)
             .HasForeignKey(e => e.FormId)

@@ -1,6 +1,6 @@
 ﻿using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Configurations.Common;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AlturaCMS.Persistence.Configurations;
@@ -8,18 +8,15 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
 {
     public override void Configure(EntityTypeBuilder<Field> builder)
     {
+        builder.ToTable("Fields", "Meta");
         builder.HasKey(e => e.Id);
-
-        builder.Property(e => e.Slug)
-            .IsRequired()
-            .HasMaxLength(100);
 
         builder.Property(e => e.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(500);
 
         builder.Property(e => e.DisplayName)
-            .HasMaxLength(200);
+            .HasMaxLength(500);
 
         builder.Property(e => e.FieldType)
             .IsRequired();
@@ -34,9 +31,11 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
             .IsRequired(false);
 
         builder.Property(e => e.MinValue)
+            .HasPrecision(18, 8)
             .IsRequired(false);
 
         builder.Property(e => e.MaxValue)
+            .HasPrecision(18, 8)
             .IsRequired(false);
 
         builder.Property(e => e.RegexPattern)
@@ -48,13 +47,10 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
             .HasConversion(
                 v => string.Join(',', v),
                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
-            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+            .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
                 (c1, c2) => c1 != null && c2 != null ? c1.SequenceEqual(c2) : c1 == c2,
                 c => c != null ? c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())) : 0,
                 c => c != null ? c.ToList() : new List<string>()));
-
-        builder.HasIndex(e => e.Slug)
-            .IsUnique();
 
         builder.HasIndex(e => e.Name)
             .IsUnique();
