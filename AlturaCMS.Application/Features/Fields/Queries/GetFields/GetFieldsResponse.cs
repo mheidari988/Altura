@@ -14,8 +14,8 @@ public class FieldDto
     public bool IsRequired { get; set; }
     public int? MinLength { get; set; }
     public int? MaxLength { get; set; }
-    public int? MinValue { get; set; }
-    public int? MaxValue { get; set; }
+    public decimal? MinValue { get; set; }
+    public decimal? MaxValue { get; set; }
     public string? RegexPattern { get; set; } = string.Empty;
     public List<string>? AllowedValues { get; set; } = [];
 }
