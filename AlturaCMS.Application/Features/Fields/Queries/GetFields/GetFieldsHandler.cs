@@ -22,7 +22,7 @@ public class GetFieldsHandler(IFieldService fieldService) : IRequestHandler<GetF
             {
                 Id = f.Id,
                 Name = f.Name,
-                Type = f.Type,
+                FieldType = f.FieldType,
                 IsRequired = f.IsRequired,
                 MinLength = f.MinLength,
                 MaxLength = f.MaxLength,
