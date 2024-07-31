@@ -24,12 +24,20 @@ public class CreateContentTypeHandler(
             Fields = []
         };
 
+        request.Fields.Add(new CreateContentTypeFieldDto()
+        {
+            Name = "Slug",
+            DisplayName = "Slug",
+            FieldType = FieldType.Text,
+            IsRequired = true,
+            MaxLength = 255,
+        });
+
         foreach (var fieldDto in request.Fields)
         {
             // create field
             var field = await fieldService.CreateAsync(new Field
             {
-                Slug = fieldDto.Slug,
                 Name = fieldDto.Name,
                 DisplayName = fieldDto.DisplayName,
                 FieldType = fieldDto.FieldType,

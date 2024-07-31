@@ -8,12 +8,6 @@ namespace AlturaCMS.Domain.Entities
     public class Field : BaseEntity
     {
         /// <summary>
-        /// Gets or sets the slug of the field.
-        /// </summary>
-        /// <value>The slug of the field.</value>
-        public string Slug { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets or sets the name of the attribute in the database table.
         /// </summary>
         /// <value>The name of the attribute in table.</value>

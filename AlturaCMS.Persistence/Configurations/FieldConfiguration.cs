@@ -10,10 +10,6 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
     {
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Slug)
-            .IsRequired()
-            .HasMaxLength(100);
-
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(100);
@@ -52,9 +48,6 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
                 (c1, c2) => c1 != null && c2 != null ? c1.SequenceEqual(c2) : c1 == c2,
                 c => c != null ? c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())) : 0,
                 c => c != null ? c.ToList() : new List<string>()));
-
-        builder.HasIndex(e => e.Slug)
-            .IsUnique();
 
         builder.HasIndex(e => e.Name)
             .IsUnique();
