@@ -17,13 +17,13 @@ public abstract class BaseEntityConfiguration<T> : IEntityTypeConfiguration<T> w
 
         builder.Property(e => e.CreatedBy)
             .IsRequired()
-            .HasMaxLength(450);
+            .HasMaxLength(500);
 
         builder.Property(e => e.UpdatedBy)
-            .HasMaxLength(450);
+            .HasMaxLength(500);
 
         builder.Property(e => e.DeletedBy)
-            .HasMaxLength(450);
+            .HasMaxLength(500);
 
         // Custom constraint to ensure DeletedDate and DeletedBy are not null if IsDeleted is true
         builder.ToTable(typeof(T).Name, 
