@@ -2,8 +2,6 @@
 using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using System.Linq.Expressions;
 
 namespace AlturaCMS.Persistence.Context;
 
@@ -30,19 +28,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new FormFieldConfiguration());
 
         // Apply soft delete and concurrency control configurations
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-            {
-                var entityBuilder = modelBuilder.Entity(entityType.ClrType);
+        ApplyBaseEntityConfiguration<ContentType>(modelBuilder);
+        ApplyBaseEntityConfiguration<Field>(modelBuilder);
+        ApplyBaseEntityConfiguration<Form>(modelBuilder);
+        ApplyBaseEntityConfiguration<FormField>(modelBuilder);
+    }
 
-                // Apply the query filter for soft delete
-                entityBuilder.HasQueryFilter(ConvertFilterExpression<BaseEntity>(e => !e.IsDeleted));
-
-                // Apply concurrency token
-                entityBuilder.Property<byte[]>("RowVersion").IsRowVersion();
-            }
-        }
+    private void ApplyBaseEntityConfiguration<TEntity>(ModelBuilder modelBuilder) where TEntity : BaseEntity
+    {
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<TEntity>().Property<byte[]>("RowVersion").IsRowVersion();
     }
 
     public override int SaveChanges()
@@ -66,12 +61,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         }
 
         return base.SaveChanges();
-    }
-
-    private static LambdaExpression ConvertFilterExpression<T>(Expression<Func<T, bool>> filterExpression)
-    {
-        var parameter = Expression.Parameter(typeof(T));
-        var newExpression = ReplacingExpressionVisitor.Replace(filterExpression.Parameters.Single(), parameter, filterExpression.Body);
-        return Expression.Lambda(newExpression, parameter);
     }
 }
