@@ -6,7 +6,8 @@ using MediatR;
 namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
 public class CreateContentTypeHandler(
     IContentTypeService contentTypeService,
-    IFieldService fieldService) : IRequestHandler<CreateContentTypeCommand, CreateContentTypeResponse>
+    IFieldService fieldService,
+    IDynamicTableService dynamicTableService) : IRequestHandler<CreateContentTypeCommand, CreateContentTypeResponse>
 {
     public async Task<CreateContentTypeResponse> Handle(CreateContentTypeCommand request, CancellationToken cancellationToken)
     {
@@ -36,7 +37,8 @@ public class CreateContentTypeHandler(
             }
         }
 
-        var createdContentType = await contentTypeService.CreateAsync(contentType);
+        var createdContentType = await contentTypeService.CreateAsync(contentType) ?? throw new Exception("Failed to create content type");
+        dynamicTableService.CreateTable(createdContentType);
 
         return new CreateContentTypeResponse
         {

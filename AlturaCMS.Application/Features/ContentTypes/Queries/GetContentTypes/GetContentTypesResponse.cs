@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlturaCMS.Persistence.Scripts;
-internal class TableCreationScripts
+namespace AlturaCMS.Application.Features.ContentTypes.Queries.GetContentTypes;
+public class GetContentTypesResponse
 {
 }
