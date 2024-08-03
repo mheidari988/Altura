@@ -45,19 +45,16 @@ public abstract class BaseEntity
     /// Gets or sets the username of the user who created the entity.
     /// </summary>
     [Required]
-    [MaxLength(450)]
     public string CreatedBy { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the username of the user who last updated the entity.
     /// </summary>
-    [MaxLength(450)]
     public string UpdatedBy { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the username of the user who deleted the entity.
     /// </summary>
-    [MaxLength(450)]
     public string DeletedBy { get; set; } = string.Empty;
 
     /// <summary>
