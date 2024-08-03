@@ -51,7 +51,6 @@ namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
                     DisplayName = "Slug",
                     FieldType = FieldType.Text,
                     IsRequired = true,
-                    IsUnique = true,
                     MaxLength = 500,
                     RegexPattern = null
                 });
@@ -71,6 +70,8 @@ namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
                         MaxValue = fieldDto.MaxValue,
                         MinValue = fieldDto.MinValue,
                         RegexPattern = fieldDto.RegexPattern,
+                        ReferenceDisplayFieldName = fieldDto.ReferenceDisplayFieldName,
+                        ReferenceTableName = fieldDto.ReferenceTableName
                     });
 
                     if (field != null)
