@@ -84,5 +84,17 @@ namespace AlturaCMS.Domain.Entities
         /// </summary>
         /// <value>The list of allowed values for the field or form field.</value>
         public List<string>? AllowedValues { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the reference table name for the field or form field.
+        /// </summary>
+        /// <value>The reference table name for the field or form field.</value>
+        public string? ReferenceTableName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a field name from the reference table that we will show in the select or multiselect of the content type.
+        /// </summary>
+        /// <value>The reference table's chosen field name.</value>
+        public string? ReferenceDisplayFieldName { get; set; }
     }
 }

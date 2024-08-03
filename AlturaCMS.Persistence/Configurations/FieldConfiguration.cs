@@ -52,7 +52,12 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
                 c => c != null ? c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())) : 0,
                 c => c != null ? c.ToList() : new List<string>()));
 
-        builder.HasIndex(e => e.Name)
-            .IsUnique();
+        builder.Property(e => e.ReferenceTableName)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
+        builder.Property(e => e.ReferenceDisplayFieldName)
+            .IsRequired(false)
+            .HasMaxLength(500);
     }
 }
