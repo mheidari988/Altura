@@ -10,8 +10,6 @@ public class CreateContentTypeCommand : IRequest<CreateContentTypeResponse>
 
 public class CreateContentTypeFieldDto
 {
-    public string Slug { get; set; } = string.Empty;
-
     public string Name { get; set; } = string.Empty;
 
     public string DisplayName { get; set; } = string.Empty;
@@ -38,4 +36,7 @@ public class CreateContentTypeFieldDto
 
     public List<string>? AllowedValues { get; set; } = [];
 
+    public string? ReferenceTableName { get; set; }
+
+    public string? ReferenceDisplayFieldName { get; set; }
 }

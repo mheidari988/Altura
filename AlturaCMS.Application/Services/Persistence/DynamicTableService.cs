@@ -8,7 +8,7 @@ namespace AlturaCMS.Application.Services.Persistence;
 public class DynamicTableService : IDynamicTableService
 {
     private readonly string _connectionString;
-    private readonly string schema = "Dynamic";
+    public const string DynamicTableSchema = "Dynamic";
 
     public DynamicTableService(IConfiguration configuration)
     {
@@ -17,7 +17,7 @@ public class DynamicTableService : IDynamicTableService
 
     public async ValueTask<bool> CreateTableAsync(ContentType contentType)
     {
-        var createSchemaScript = GenerateCreateSchemaScript(schema);
+        var createSchemaScript = GenerateCreateSchemaScript(DynamicTableSchema);
         var createTableScript = GenerateCreateTableScript(contentType);
 
         using var connection = new SqlConnection(_connectionString);
@@ -27,6 +27,7 @@ public class DynamicTableService : IDynamicTableService
         await createSchemaCommand.ExecuteNonQueryAsync();
 
         using var createTableCommand = new SqlCommand(createTableScript, connection);
+
         int result = await createTableCommand.ExecuteNonQueryAsync();
 
         // If result is -1, the table was created successfully
@@ -50,7 +51,7 @@ public class DynamicTableService : IDynamicTableService
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine($"CREATE TABLE [{schema}].[{contentType.Name}] (");
+        sb.AppendLine($"CREATE TABLE [{DynamicTableSchema}].[{contentType.Name}] (");
         sb.AppendLine("[Id] UNIQUEIDENTIFIER PRIMARY KEY,");
 
         foreach (var field in contentType.Fields)
@@ -83,8 +84,8 @@ public class DynamicTableService : IDynamicTableService
     {
         var pivotTableName = $"{contentTypeName}_{field.Name}";
         return $@"
-            CREATE TABLE [{schema}].[{pivotTableName}] (
-                [{contentTypeName}Id] UNIQUEIDENTIFIER REFERENCES [{schema}].[{contentTypeName}]([Id]),
+            CREATE TABLE [{DynamicTableSchema}].[{pivotTableName}] (
+                [{contentTypeName}Id] UNIQUEIDENTIFIER REFERENCES [{DynamicTableSchema}].[{contentTypeName}]([Id]),
                 [{field.Name}Id] UNIQUEIDENTIFIER,
                 PRIMARY KEY ([{contentTypeName}Id], [{field.Name}Id])
             );";
