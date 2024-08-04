@@ -1,15 +1,16 @@
-﻿using AlturaCMS.Domain.Common;
-using AlturaCMS.Persistence.Specifications;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
-namespace AlturaCMS.Persistence.Repositories
+namespace AlturaCMS.DataAccess
 {
     /// <summary>
     /// Represents an asynchronous repository for managing entities.
     /// </summary>
     /// <typeparam name="T">The type of the entity managed by the repository.</typeparam>
-    public interface IAsyncRepository<T> where T : BaseEntity
+    public interface IAsyncRepository<T, TContext>
+        where T : class
+        where TContext : DbContext
     {
         /// <summary>
         /// Gets an entity by its identifier asynchronously.

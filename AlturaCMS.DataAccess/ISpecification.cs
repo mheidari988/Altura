@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace AlturaCMS.Persistence.Specifications
+namespace AlturaCMS.DataAccess
 {
     /// <summary>
     /// Represents a specification pattern for querying entities.

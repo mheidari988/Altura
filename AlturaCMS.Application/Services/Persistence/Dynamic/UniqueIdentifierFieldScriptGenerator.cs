@@ -1,4 +1,5 @@
-﻿using AlturaCMS.Domain.Entities;
+﻿using AlturaCMS.Domain;
+using AlturaCMS.Domain.Entities;
 using System.Text;
 
 namespace AlturaCMS.Application.Services.Persistence.Dynamic;
@@ -17,7 +18,7 @@ public class UniqueIdentifierFieldScriptGenerator : IFieldScriptGenerator
         // Add foreign key constraint if referenced table and column are provided
         if (field.ReferenceTableName != null)
         {
-            sb.Append($" REFERENCES [{DynamicTableService.DynamicTableSchema}].[{field.ReferenceTableName}]([Id])");
+            sb.Append($" REFERENCES [{DomainShared.Constants.DynamicSchema}].[{field.ReferenceTableName}]([Id])");
         }
 
         sb.Append(",");

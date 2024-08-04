@@ -1,10 +1,9 @@
 ﻿using AlturaCMS.Application.Services.Persistence;
-using AlturaCMS.Domain;
+using AlturaCMS.DataAccess;
 using AlturaCMS.Domain.Entities;
-using AlturaCMS.Persistence.Repositories;
+using AlturaCMS.Persistence.Context;
 using FluentValidation;
 using MediatR;
-using static AlturaCMS.Domain.DomainShared.Constants;
 
 namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
 {
@@ -13,13 +12,13 @@ namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
         private readonly IContentTypeService _contentTypeService;
         private readonly IFieldService _fieldService;
         private readonly IDynamicTableService _dynamicTableService;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork<ApplicationDbContext> _unitOfWork;
 
         public CreateContentTypeHandler(
             IContentTypeService contentTypeService,
             IFieldService fieldService,
             IDynamicTableService dynamicTableService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork<ApplicationDbContext> unitOfWork)
         {
             _contentTypeService = contentTypeService;
             _fieldService = fieldService;

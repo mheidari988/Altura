@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-builder.Services.AddApplication(builder.Configuration);
-builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddAlturaPersistence(builder.Configuration);
+builder.Services.AddAlturaApplication(builder.Configuration);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
