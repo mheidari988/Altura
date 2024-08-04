@@ -12,6 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\AlturaCMS.DataAccess\AlturaCMS.DataAccess.csproj" />
 		<ProjectReference Include="..\AlturaCMS.Persistence\AlturaCMS.Persistence.csproj" />
 	</ItemGroup>
 

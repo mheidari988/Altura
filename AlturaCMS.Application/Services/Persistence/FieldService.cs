@@ -1,8 +1,9 @@
 ﻿using AlturaCMS.Application.Services.Persistence.Common;
+using AlturaCMS.DataAccess;
 using AlturaCMS.Domain.Entities;
-using AlturaCMS.Persistence.Repositories;
+using AlturaCMS.Persistence.Context;
 
 namespace AlturaCMS.Application.Services.Persistence;
-public class FieldService(IUnitOfWork unitOfWork) : BasePersistenceService<Field>(unitOfWork), IFieldService
+public class FieldService(IUnitOfWork<ApplicationDbContext> unitOfWork) : BasePersistenceService<Field, ApplicationDbContext>(unitOfWork), IFieldService
 {
 }

@@ -1,4 +1,4 @@
-﻿using AlturaCMS.Persistence.Specifications;
+﻿using AlturaCMS.DataAccess;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
