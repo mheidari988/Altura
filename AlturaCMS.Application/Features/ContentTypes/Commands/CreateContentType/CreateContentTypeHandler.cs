@@ -1,8 +1,10 @@
 ﻿using AlturaCMS.Application.Services.Persistence;
+using AlturaCMS.Domain;
 using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Repositories;
 using FluentValidation;
 using MediatR;
+using static AlturaCMS.Domain.DomainShared.Constants;
 
 namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
 {
@@ -44,16 +46,11 @@ namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
                     Fields = []
                 };
 
-                // Slug is a required field for all content types
-                request.Fields.Insert(0, new CreateContentTypeFieldDto()
-                {
-                    Name = "Slug",
-                    DisplayName = "Slug",
-                    FieldType = FieldType.Text,
-                    IsRequired = true,
-                    MaxLength = 500,
-                    RegexPattern = null
-                });
+                // Normalize string inputs
+                NormalizeStringInputs(request);
+
+                // Add default metadata fields for content type
+                request.Fields.AddRange(ApplicationShared.GetDefaultFields());
 
                 foreach (var fieldDto in request.Fields)
                 {
@@ -104,7 +101,11 @@ namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
                 {
                     Id = createdContentType.Id,
                     Name = createdContentType.Name,
-                    Fields = createdContentType.Fields.Select(f => new ContentTypeFieldDto
+                    Fields = createdContentType.Fields
+                    // Filter out default fields from the response
+                    .Where(f => !ApplicationShared.GetDefaultFields()
+                        .Any(df => df.Name == f.Field?.Name && df.DisplayName == f.Field.DisplayName))
+                    .Select(f => new ContentTypeFieldDto
                     {
                         FieldId = f.FieldId ?? Guid.Empty,
                         FieldName = f.Field?.Name?.ToString() ?? string.Empty,
@@ -116,6 +117,21 @@ namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType
                 await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Normalize string inputs by trimming leading and trailing whitespace characters
+        /// </summary>
+        /// <param name="request">
+        /// The <see cref="CreateContentTypeCommand"/> request object to normalize.
+        /// </param>
+        private static void NormalizeStringInputs(CreateContentTypeCommand request)
+        {
+            request.Name = request.Name.Trim();
+            request.Fields.ForEach(f => f.Name = f.Name.Trim());
+            request.Fields.ForEach(f => f.DisplayName = f.DisplayName.Trim());
+            request.Fields.ForEach(f => f.ReferenceTableName = f.ReferenceTableName?.Trim());
+            request.Fields.ForEach(f => f.ReferenceDisplayFieldName = f.ReferenceDisplayFieldName?.Trim());
         }
     }
 }

@@ -21,6 +21,14 @@ public class CreateContentTypeFieldValidator : AbstractValidator<CreateContentTy
     public CreateContentTypeFieldValidator()
     {
         RuleFor(x => x.Name)
+            .Must((dto, name) => !ApplicationShared.GetDefaultFields().Any(f => f.Name == name))
+            .WithMessage(dto => $"Name '{dto.Name}' is reserved.");
+
+        RuleFor(x => x.DisplayName)
+            .Must((dto, displayName) => !ApplicationShared.GetDefaultFields().Any(f => f.DisplayName == displayName))
+            .WithMessage(dto => $"DisplayName '{dto.DisplayName}' is reserved.");
+
+        RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(100).WithMessage("Name must not exceed 100 characters.");
 
