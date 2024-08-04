@@ -1,4 +1,5 @@
-﻿using AlturaCMS.Domain.Entities;
+﻿using AlturaCMS.Domain;
+using AlturaCMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -7,7 +8,7 @@ public class ContentTypeFieldConfiguration : IEntityTypeConfiguration<ContentTyp
 {
     public void Configure(EntityTypeBuilder<ContentTypeField> builder)
     {
-        builder.ToTable("ContentTypeFields", "Meta");
+        builder.ToTable("ContentTypeFields", DomainShared.Constants.MetadataSchema);
         builder.HasKey(e => new { e.ContentTypeId, e.FieldId });
 
         builder.HasOne(e => e.ContentType)

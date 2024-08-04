@@ -1,4 +1,5 @@
 ﻿using AlturaCMS.Application.Services.Persistence.Dynamic;
+using AlturaCMS.Domain;
 using AlturaCMS.Domain.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -8,16 +9,16 @@ namespace AlturaCMS.Application.Services.Persistence;
 public class DynamicTableService : IDynamicTableService
 {
     private readonly string _connectionString;
-    public const string DynamicTableSchema = "Dynamic";
 
     public DynamicTableService(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration));
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public async ValueTask<bool> CreateTableAsync(ContentType contentType)
     {
-        var createSchemaScript = GenerateCreateSchemaScript(DynamicTableSchema);
+        var createSchemaScript = GenerateCreateSchemaScript(DomainShared.Constants.DynamicSchema);
         var createTableScript = GenerateCreateTableScript(contentType);
 
         using var connection = new SqlConnection(_connectionString);
@@ -28,10 +29,7 @@ public class DynamicTableService : IDynamicTableService
 
         using var createTableCommand = new SqlCommand(createTableScript, connection);
 
-        int result = await createTableCommand.ExecuteNonQueryAsync();
-
-        // If result is -1, the table was created successfully
-        return result == -1;
+        return await createTableCommand.ExecuteNonQueryAsync() == -1;
     }
 
     private string GenerateCreateSchemaScript(string schema)
@@ -51,22 +49,32 @@ public class DynamicTableService : IDynamicTableService
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine($"CREATE TABLE [{DynamicTableSchema}].[{contentType.Name}] (");
+        sb.AppendLine($"CREATE TABLE [{DomainShared.Constants.DynamicSchema}].[{contentType.Name}] (");
         sb.AppendLine("[Id] UNIQUEIDENTIFIER PRIMARY KEY,");
 
-        foreach (var field in contentType.Fields)
+        // remove content type field which has RowVersion name
+        // we will add it seperatedly
+        contentType.Fields = contentType.Fields
+            .Where(c => c.Field?.Name != DomainShared.Constants.DefaultFields.RowVersion.Name).ToList();
+
+        var regularFields = contentType.Fields
+            .Where(f => f.Field?.FieldType != FieldType.MultiSelect);
+
+        var multiSelectFields = contentType.Fields
+            .Where(f => f.Field?.FieldType == FieldType.MultiSelect);
+
+        foreach (var field in regularFields)
         {
             sb.AppendLine(GenerateFieldScript(field.Field));
         }
 
+        // Add RowVersion field manually
+        sb.AppendLine("[RowVersion] ROWVERSION,");
         sb.AppendLine(");");
 
-        foreach (var field in contentType.Fields)
+        foreach (var field in multiSelectFields)
         {
-            if (field.Field?.FieldType == FieldType.MultiSelect)
-            {
-                sb.AppendLine(GeneratePivotTableScript(contentType.Name, field.Field));
-            }
+            sb.AppendLine(GeneratePivotTableScript(contentType.Name, field.Field!));
         }
 
         return sb.ToString();
@@ -82,12 +90,12 @@ public class DynamicTableService : IDynamicTableService
 
     private string GeneratePivotTableScript(string contentTypeName, Field field)
     {
-        var pivotTableName = $"{contentTypeName}_{field.Name}";
+        var pivotTableName = $"{contentTypeName}{field.ReferenceTableName}";
         return $@"
-            CREATE TABLE [{DynamicTableSchema}].[{pivotTableName}] (
-                [{contentTypeName}Id] UNIQUEIDENTIFIER REFERENCES [{DynamicTableSchema}].[{contentTypeName}]([Id]),
-                [{field.Name}Id] UNIQUEIDENTIFIER,
-                PRIMARY KEY ([{contentTypeName}Id], [{field.Name}Id])
+            CREATE TABLE [{DomainShared.Constants.DynamicSchema}].[{pivotTableName}] (
+                [{contentTypeName}Id] UNIQUEIDENTIFIER REFERENCES [{DomainShared.Constants.DynamicSchema}].[{contentTypeName}]([Id]),
+                [{field.ReferenceTableName}Id] UNIQUEIDENTIFIER,
+                PRIMARY KEY ([{contentTypeName}Id], [{field.ReferenceTableName}Id])
             );";
     }
 }

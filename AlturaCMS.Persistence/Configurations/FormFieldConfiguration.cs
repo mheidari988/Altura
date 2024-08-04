@@ -1,4 +1,5 @@
-﻿using AlturaCMS.Domain.Entities;
+﻿using AlturaCMS.Domain;
+using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Configurations.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,7 +9,7 @@ public class FormFieldConfiguration : BaseEntityConfiguration<FormField>
 {
     public override void Configure(EntityTypeBuilder<FormField> builder)
     {
-        builder.ToTable("FormFields", "Meta");
+        builder.ToTable("FormFields", DomainShared.Constants.MetadataSchema);
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Name)
             .IsRequired()

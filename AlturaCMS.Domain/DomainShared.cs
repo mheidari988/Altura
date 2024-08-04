@@ -3,6 +3,8 @@ public static class DomainShared
 {
     public static class Constants
     {
+        public const string DynamicSchema = "Dynamic";
+        public const string MetadataSchema = "Metadata";
         public static class DefaultFields
         {
             public static class Slug
