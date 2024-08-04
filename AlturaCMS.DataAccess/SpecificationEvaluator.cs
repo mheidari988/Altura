@@ -1,14 +1,12 @@
-﻿using AlturaCMS.Domain.Common;
-using AlturaCMS.Persistence.Specifications;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace AlturaCMS.Persistence.Repositories;
+namespace AlturaCMS.DataAccess;
 
 /// <summary>
 /// Evaluates specifications to apply them to queryable entity sets.
 /// </summary>
 /// <typeparam name="T">The type of the entity to which the specification applies.</typeparam>
-public class SpecificationEvaluator<T> where T : BaseEntity
+public class SpecificationEvaluator<T> where T : class
 {
     /// <summary>
     /// Applies the specification to the queryable entity set.
