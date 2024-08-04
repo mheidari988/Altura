@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlturaCMS.Backend.API.Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlturaCMS.WebApp", "AlturaCMS.WebApp\AlturaCMS.WebApp.csproj", "{0683D12C-B669-4691-8349-F3BA33614518}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlturaCMS.Backend.Scaffolder", "AlturaCMS.Backend.Scaffolder\AlturaCMS.Backend.Scaffolder.csproj", "{3D08A51D-422C-4F0D-8C4F-36A5D40C476E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{0683D12C-B669-4691-8349-F3BA33614518}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0683D12C-B669-4691-8349-F3BA33614518}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0683D12C-B669-4691-8349-F3BA33614518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D08A51D-422C-4F0D-8C4F-36A5D40C476E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D08A51D-422C-4F0D-8C4F-36A5D40C476E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D08A51D-422C-4F0D-8C4F-36A5D40C476E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D08A51D-422C-4F0D-8C4F-36A5D40C476E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,6 +120,7 @@ Global
 		{138AC5A7-3A18-48A3-A071-95669D35B587} = {E773E533-32CB-46F8-859F-88F6650F3344}
 		{BD10559A-B7ED-4C69-9350-3D4BBB102DFF} = {86F92C01-D243-4303-A5A3-4E5AD2794547}
 		{0683D12C-B669-4691-8349-F3BA33614518} = {BA3D4DD5-D0AA-4A87-8CA5-763B7DF2065E}
+		{3D08A51D-422C-4F0D-8C4F-36A5D40C476E} = {E773E533-32CB-46F8-859F-88F6650F3344}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {930691F2-8DDA-487A-9CDD-D01F7CC31891}
