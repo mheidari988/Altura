@@ -1,10 +1,10 @@
 ﻿using AlturaCMS.Application.Services.Persistence.Common;
+using AlturaCMS.DataAccess;
 using AlturaCMS.Domain.Entities;
-using AlturaCMS.Persistence.Repositories;
+using AlturaCMS.Persistence.Context;
 
 namespace AlturaCMS.Application.Services.Persistence;
-public class ContentTypeService(IUnitOfWork unitOfWork) : BasePersistenceService<ContentType>(unitOfWork), IContentTypeService
+public class ContentTypeService(IUnitOfWork<ApplicationDbContext> unitOfWork) : BasePersistenceService<ContentType, ApplicationDbContext>(unitOfWork), IContentTypeService
 {
-
     // Add any additional methods specific to ContentTypeService to the IContentTypeService and implement it here
 }

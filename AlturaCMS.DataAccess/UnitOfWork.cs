@@ -1,25 +1,26 @@
-﻿using AlturaCMS.Domain.Common;
-using AlturaCMS.Persistence.Context;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AlturaCMS.Persistence.Repositories
+namespace AlturaCMS.DataAccess
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
     {
-        private readonly ApplicationDbContext _context;
+        private readonly TContext _context;
         private readonly IServiceProvider _serviceProvider;
         private IDbContextTransaction? _currentTransaction;
 
-        public UnitOfWork(ApplicationDbContext context, IServiceProvider serviceProvider)
+        public UnitOfWork(TContext context, IServiceProvider serviceProvider)
         {
-            _context = context;
-            _serviceProvider = serviceProvider;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        public IAsyncRepository<T> Repository<T>() where T : BaseEntity
+        public IAsyncRepository<T, TContext> Repository<T>() where T : class
         {
-            return _serviceProvider.GetService<IAsyncRepository<T>>() ?? throw new ArgumentNullException($"Repository for {typeof(T).Name} not found.");
+            // Resolve the repository from the service provider
+            return _serviceProvider.GetService<IAsyncRepository<T, TContext>>()
+                   ?? throw new ArgumentNullException($"Repository for {typeof(T).Name} not found.");
         }
 
         public async Task<int> CompleteAsync()
