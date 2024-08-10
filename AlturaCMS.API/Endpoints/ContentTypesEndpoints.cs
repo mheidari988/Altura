@@ -1,5 +1,5 @@
-﻿using AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
-using AlturaCMS.Application.Features.ContentTypes.Queries.GetContentTypes;
+﻿using AlturaCMS.Application.Features.Contents.Commands.CreateContent;
+using AlturaCMS.Application.Features.Contents.Queries.GetContents;
 using MediatR;
 
 namespace AlturaCMS.API.Endpoints;
@@ -8,9 +8,9 @@ public static class ContentTypesEndpoints
 {
     public static void MapContentTypesEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/api/contenttypes", async (CreateContentTypeCommand command, IMediator mediator, HttpContext context) =>
+        endpoints.MapPost("/api/Contents", async (CreateContentCommand command, IMediator mediator, HttpContext context) =>
         {
-            var validator = new CreateContentTypeValidator();
+            var validator = new CreateContentValidator();
             var validationResult = await validator.ValidateAsync(command);
 
             if (!validationResult.IsValid)
@@ -19,12 +19,12 @@ public static class ContentTypesEndpoints
             }
 
             var result = await mediator.Send(command);
-            return Results.Created($"/api/contenttypes/{result.Id}", result);
-        }).WithName("CreateContentType").WithOpenApi();
+            return Results.Created($"/api/Contents/{result.Id}", result);
+        }).WithName("CreateContent").WithOpenApi();
 
-        endpoints.MapGet("/api/contenttypes", async (IMediator mediator) =>
+        endpoints.MapGet("/api/Contents", async (IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetContentTypesQuery());
+            var result = await mediator.Send(new GetContentsQuery());
             return Results.Ok(result);
         }).WithName("GetContentTypes").WithOpenApi();
     }
