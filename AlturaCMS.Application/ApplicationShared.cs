@@ -1,4 +1,4 @@
-﻿using AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
+﻿using AlturaCMS.Application.Features.Contents.Commands.CreateContent;
 using AlturaCMS.Domain;
 using AlturaCMS.Domain.Entities;
 

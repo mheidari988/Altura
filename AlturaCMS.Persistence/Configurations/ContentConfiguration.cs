@@ -5,22 +5,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AlturaCMS.Persistence.Configurations;
-public class FormConfiguration : BaseEntityConfiguration<Form>
+public class ContentConfiguration : BaseEntityConfiguration<Content>
 {
-    public override void Configure(EntityTypeBuilder<Form> builder)
+    public override void Configure(EntityTypeBuilder<Content> builder)
     {
         base.Configure(builder);
 
-        builder.ToTable("Forms", DomainShared.Constants.MetadataSchema);
+        builder.ToTable("Contents", DomainShared.Constants.MetadataSchema);
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.HasMany(e => e.FormFields)
-            .WithOne(ff => ff.Form)
-            .HasForeignKey(ff => ff.FormId)
+        builder.HasMany(e => e.ContentFields)
+            .WithOne(cf => cf.Content)
+            .HasForeignKey(cf => cf.ContentId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

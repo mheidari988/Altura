@@ -3,5 +3,5 @@
 namespace AlturaCMS.Application.Services.Persistence;
 public interface IDynamicTableService
 {
-    ValueTask<bool> CreateTableAsync(ContentType contentType);
+    ValueTask<bool> CreateTableAsync(Content contentType);
 }

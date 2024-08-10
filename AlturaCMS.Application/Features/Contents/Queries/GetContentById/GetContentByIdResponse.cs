@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlturaCMS.Application.Features.ContentTypes.Queries.GetContentTypeById;
-public class GetContentTypeByIdResponse
+namespace AlturaCMS.Application.Features.Contents.Queries.GetContentById;
+public class GetContentByIdResponse
 {
 }

@@ -14,6 +14,12 @@ namespace AlturaCMS.Domain.Entities
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets display name for the form field.
+        /// </summary>
+        /// <value>The display name of the form field</value>
+        public string DisplayName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the type of the form field.
         /// </summary>
         /// <value>The type of the form field.</value>
