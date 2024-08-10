@@ -1,8 +1,8 @@
 ﻿using AlturaCMS.Domain.Entities;
 using MediatR;
 
-namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
-public class CreateContentTypeCommand : IRequest<CreateContentTypeResponse>
+namespace AlturaCMS.Application.Features.Contents.Commands.CreateContent;
+public class CreateContentCommand : IRequest<CreateContentResponse>
 {
     public string Name { get; set; } = string.Empty;
     public List<CreateContentTypeFieldDto> Fields { get; set; } = [];

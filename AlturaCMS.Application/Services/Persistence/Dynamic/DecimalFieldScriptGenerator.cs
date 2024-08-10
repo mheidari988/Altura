@@ -4,7 +4,7 @@ using System.Text;
 namespace AlturaCMS.Application.Services.Persistence.Dynamic;
 public class DecimalFieldScriptGenerator : IFieldScriptGenerator
 {
-    public string GenerateFieldScript(Field field)
+    public string GenerateFieldScript(ContentField field)
     {
         var sb = new StringBuilder();
         sb.Append($"[{field.Name}] DECIMAL(18,8)");
@@ -15,7 +15,7 @@ public class DecimalFieldScriptGenerator : IFieldScriptGenerator
         return sb.ToString();
     }
 
-    private void AppendConstraints(StringBuilder sb, Field field)
+    private void AppendConstraints(StringBuilder sb, ContentField field)
     {
         var checkConstraints = new List<string>();
 

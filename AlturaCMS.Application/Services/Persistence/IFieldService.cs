@@ -2,6 +2,6 @@
 using AlturaCMS.Domain.Entities;
 
 namespace AlturaCMS.Application.Services.Persistence;
-public interface IFieldService : IBasePersistenceService<Field>
+public interface IFieldService : IBasePersistenceService<ContentField>
 {
 }

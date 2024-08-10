@@ -4,7 +4,7 @@ using System.Text;
 namespace AlturaCMS.Application.Services.Persistence.Dynamic;
 public class NVarCharFieldScriptGenerator : IFieldScriptGenerator
 {
-    public string GenerateFieldScript(Field field)
+    public string GenerateFieldScript(ContentField field)
     {
         var sb = new StringBuilder();
         string len = "MAX";
@@ -20,7 +20,7 @@ public class NVarCharFieldScriptGenerator : IFieldScriptGenerator
         return sb.ToString();
     }
 
-    private void AppendConstraints(StringBuilder sb, Field field)
+    private void AppendConstraints(StringBuilder sb, ContentField field)
     {
         var checkConstraints = new List<string>();
 

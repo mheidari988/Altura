@@ -4,7 +4,7 @@ using System.Text;
 namespace AlturaCMS.Application.Services.Persistence.Dynamic;
 public class DateTimeFieldScriptGenerator : IFieldScriptGenerator
 {
-    public string GenerateFieldScript(Field field)
+    public string GenerateFieldScript(ContentField field)
     {
         var sb = new StringBuilder();
         sb.Append($"[{field.Name}] DATETIME2");
@@ -15,7 +15,7 @@ public class DateTimeFieldScriptGenerator : IFieldScriptGenerator
         return sb.ToString();
     }
 
-    private void AppendConstraints(StringBuilder sb, Field field)
+    private void AppendConstraints(StringBuilder sb, ContentField field)
     {
         var checkConstraints = new List<string>();
 

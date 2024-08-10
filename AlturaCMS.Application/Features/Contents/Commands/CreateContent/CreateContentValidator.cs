@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace AlturaCMS.Application.Features.ContentTypes.Commands.CreateContentType;
+namespace AlturaCMS.Application.Features.Contents.Commands.CreateContent;
 
-public class CreateContentTypeValidator : AbstractValidator<CreateContentTypeCommand>
+public class CreateContentValidator : AbstractValidator<CreateContentCommand>
 {
-    public CreateContentTypeValidator()
+    public CreateContentValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
@@ -54,9 +54,5 @@ public class CreateContentTypeFieldValidator : AbstractValidator<CreateContentTy
 
         RuleFor(x => x.RegexPattern)
             .MaximumLength(500).WithMessage("RegexPattern must not exceed 500 characters.");
-
-        RuleFor(x => x.AllowedValues)
-            .NotNull().WithMessage("AllowedValues must not be null.")
-            .Must(av => av.All(v => !string.IsNullOrEmpty(v))).WithMessage("AllowedValues must not contain null or empty values.");
     }
 }
