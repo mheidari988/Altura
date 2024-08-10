@@ -5,7 +5,7 @@ namespace AlturaCMS.Domain.Entities
     /// <summary>
     /// Represents an field in the AlturaCMS domain.
     /// </summary>
-    public class Field : BaseEntity
+    public class ContentField : BaseEntity
     {
         /// <summary>
         /// Gets or sets the name of the attribute in the database table.
@@ -96,5 +96,17 @@ namespace AlturaCMS.Domain.Entities
         /// </summary>
         /// <value>The reference table's chosen field name.</value>
         public string? ReferenceDisplayFieldName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the Content.
+        /// </summary>
+        /// <value>The ID of the Content.</value>
+        public Guid ContentId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the content associated with this content field.
+        /// </summary>
+        /// <value>The content associated with this content field.</value>
+        public Content Content { get; set; } = default!;
     }
 }

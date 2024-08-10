@@ -5,11 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AlturaCMS.Persistence.Configurations;
-public class FieldConfiguration : BaseEntityConfiguration<Field>
+public class ContentFieldConfiguration : BaseEntityConfiguration<ContentField>
 {
-    public override void Configure(EntityTypeBuilder<Field> builder)
+    public override void Configure(EntityTypeBuilder<ContentField> builder)
     {
-        builder.ToTable("Fields", DomainShared.Constants.MetadataSchema);
+        base.Configure(builder);
+
+        builder.ToTable("ContentFields", DomainShared.Constants.MetadataSchema);
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Name)
@@ -60,5 +62,10 @@ public class FieldConfiguration : BaseEntityConfiguration<Field>
         builder.Property(e => e.ReferenceDisplayFieldName)
             .IsRequired(false)
             .HasMaxLength(500);
+
+        builder.HasOne(e => e.Content)
+            .WithMany(c => c.ContentFields)
+            .HasForeignKey(e => e.ContentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

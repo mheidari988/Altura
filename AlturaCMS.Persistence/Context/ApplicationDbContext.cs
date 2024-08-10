@@ -10,9 +10,8 @@ namespace AlturaCMS.Persistence.Context;
 /// </summary>
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<ContentType> ContentTypes { get; set; }
-    public DbSet<Field> Fields { get; set; }
-    public DbSet<ContentTypeField> ContentTypeFields { get; set; }
+    public DbSet<Content> ContentTypes { get; set; }
+    public DbSet<ContentField> Fields { get; set; }
     public DbSet<Form> Forms { get; set; }
     public DbSet<FormField> FormFields { get; set; }
 
@@ -21,15 +20,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         base.OnModelCreating(modelBuilder);
 
         // Apply configurations for each entity
-        modelBuilder.ApplyConfiguration(new ContentTypeConfiguration());
-        modelBuilder.ApplyConfiguration(new FieldConfiguration());
-        modelBuilder.ApplyConfiguration(new ContentTypeFieldConfiguration());
+        modelBuilder.ApplyConfiguration(new ContentConfiguration());
+        modelBuilder.ApplyConfiguration(new ContentFieldConfiguration());
         modelBuilder.ApplyConfiguration(new FormConfiguration());
         modelBuilder.ApplyConfiguration(new FormFieldConfiguration());
 
         // Apply soft delete and concurrency control configurations
-        ApplyBaseEntityConfiguration<ContentType>(modelBuilder);
-        ApplyBaseEntityConfiguration<Field>(modelBuilder);
+        ApplyBaseEntityConfiguration<Content>(modelBuilder);
+        ApplyBaseEntityConfiguration<ContentField>(modelBuilder);
         ApplyBaseEntityConfiguration<Form>(modelBuilder);
         ApplyBaseEntityConfiguration<FormField>(modelBuilder);
     }
