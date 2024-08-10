@@ -16,7 +16,7 @@ public class DynamicTableService : IDynamicTableService
             ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public async ValueTask<bool> CreateTableAsync(ContentType contentType)
+    public async ValueTask<bool> CreateTableAsync(Content contentType)
     {
         var createSchemaScript = GenerateCreateSchemaScript(DomainShared.Constants.DynamicSchema);
         var createTableScript = GenerateCreateTableScript(contentType);
@@ -41,31 +41,31 @@ public class DynamicTableService : IDynamicTableService
             END";
     }
 
-    private string GenerateCreateTableScript(ContentType contentType)
+    private string GenerateCreateTableScript(Content content)
     {
-        if (contentType.Fields == null || contentType.Fields.Count == 0)
+        if (content.ContentFields == null || content.ContentFields.Count == 0)
         {
-            throw new ArgumentException("ContentType must have at least one field.");
+            throw new ArgumentException("Content must have at least one field.");
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine($"CREATE TABLE [{DomainShared.Constants.DynamicSchema}].[{contentType.Name}] (");
+        sb.AppendLine($"CREATE TABLE [{DomainShared.Constants.DynamicSchema}].[{content.Name}] (");
         sb.AppendLine("[Id] UNIQUEIDENTIFIER PRIMARY KEY,");
 
-        // remove content type field which has RowVersion name
+        // remove content field which has RowVersion name
         // we will add it seperatedly
-        contentType.Fields = contentType.Fields
-            .Where(c => c.Field?.Name != DomainShared.Constants.DefaultFields.RowVersion.Name).ToList();
+        content.ContentFields = content.ContentFields
+            .Where(c => c.Name != DomainShared.Constants.DefaultFields.RowVersion.Name).ToList();
 
-        var regularFields = contentType.Fields
-            .Where(f => f.Field?.FieldType != FieldType.MultiSelect);
+        var regularFields = content.ContentFields
+            .Where(f => f.FieldType != FieldType.MultiSelect);
 
-        var multiSelectFields = contentType.Fields
-            .Where(f => f.Field?.FieldType == FieldType.MultiSelect);
+        var multiSelectFields = content.ContentFields
+            .Where(f => f.FieldType == FieldType.MultiSelect);
 
         foreach (var field in regularFields)
         {
-            sb.AppendLine(GenerateFieldScript(field.Field));
+            sb.AppendLine(GenerateFieldScript(field));
         }
 
         // Add RowVersion field manually
@@ -74,13 +74,13 @@ public class DynamicTableService : IDynamicTableService
 
         foreach (var field in multiSelectFields)
         {
-            sb.AppendLine(GeneratePivotTableScript(contentType.Name, field.Field!));
+            sb.AppendLine(GeneratePivotTableScript(content.Name, field!));
         }
 
         return sb.ToString();
     }
 
-    private string GenerateFieldScript(Field? field)
+    private string GenerateFieldScript(ContentField? field)
     {
         ArgumentNullException.ThrowIfNull(field);
 
@@ -88,14 +88,14 @@ public class DynamicTableService : IDynamicTableService
         return generator.GenerateFieldScript(field);
     }
 
-    private string GeneratePivotTableScript(string contentTypeName, Field field)
+    private string GeneratePivotTableScript(string contentName, ContentField field)
     {
-        var pivotTableName = $"{contentTypeName}{field.ReferenceTableName}";
+        var pivotTableName = $"{contentName}{field.ReferenceTableName}";
         return $@"
             CREATE TABLE [{DomainShared.Constants.DynamicSchema}].[{pivotTableName}] (
-                [{contentTypeName}Id] UNIQUEIDENTIFIER REFERENCES [{DomainShared.Constants.DynamicSchema}].[{contentTypeName}]([Id]),
+                [{contentName}Id] UNIQUEIDENTIFIER REFERENCES [{DomainShared.Constants.DynamicSchema}].[{contentName}]([Id]),
                 [{field.ReferenceTableName}Id] UNIQUEIDENTIFIER,
-                PRIMARY KEY ([{contentTypeName}Id], [{field.ReferenceTableName}Id])
+                PRIMARY KEY ([{contentName}Id], [{field.ReferenceTableName}Id])
             );";
     }
 }
