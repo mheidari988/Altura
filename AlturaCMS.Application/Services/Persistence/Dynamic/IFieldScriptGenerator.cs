@@ -3,5 +3,5 @@
 namespace AlturaCMS.Application.Services.Persistence.Dynamic;
 public interface IFieldScriptGenerator
 {
-    string GenerateFieldScript(Field field);
+    string GenerateFieldScript(ContentField field);
 }

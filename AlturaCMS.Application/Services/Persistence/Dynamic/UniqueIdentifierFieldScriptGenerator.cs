@@ -5,7 +5,7 @@ using System.Text;
 namespace AlturaCMS.Application.Services.Persistence.Dynamic;
 public class UniqueIdentifierFieldScriptGenerator : IFieldScriptGenerator
 {
-    public string GenerateFieldScript(Field field)
+    public string GenerateFieldScript(ContentField field)
     {
         var sb = new StringBuilder();
         sb.Append($"[{field.Name}] UNIQUEIDENTIFIER");
