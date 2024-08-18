@@ -3,37 +3,65 @@ using AlturaCMS.Domain;
 using AlturaCMS.Domain.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace AlturaCMS.Application.Services.Persistence;
 public class DynamicTableService : IDynamicTableService
 {
     private readonly string _connectionString;
+    private readonly ILogger<DynamicTableService> _logger;
 
-    public DynamicTableService(IConfiguration configuration)
+    public DynamicTableService(IConfiguration configuration, ILogger<DynamicTableService> logger)
     {
         _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new ArgumentNullException(nameof(configuration));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async ValueTask<bool> CreateTableAsync(Content contentType)
     {
-        var createSchemaScript = GenerateCreateSchemaScript(DomainShared.Constants.DynamicSchema);
-        var createTableScript = GenerateCreateTableScript(contentType);
+        if (contentType == null)
+        {
+            _logger.LogError("ContentType is null in CreateTableAsync.");
+            throw new ArgumentNullException(nameof(contentType));
+        }
 
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        try
+        {
+            var createSchemaScript = GenerateCreateSchemaScript(DomainShared.Constants.DynamicSchema);
+            var createTableScript = GenerateCreateTableScript(contentType);
 
-        using var createSchemaCommand = new SqlCommand(createSchemaScript, connection);
-        await createSchemaCommand.ExecuteNonQueryAsync();
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            _logger.LogInformation("Connection to database opened for creating table {TableName}.", contentType.Name);
 
-        using var createTableCommand = new SqlCommand(createTableScript, connection);
+            using var createSchemaCommand = new SqlCommand(createSchemaScript, connection);
+            await createSchemaCommand.ExecuteNonQueryAsync();
+            _logger.LogInformation("Schema creation script executed.");
 
-        return await createTableCommand.ExecuteNonQueryAsync() == -1;
+            using var createTableCommand = new SqlCommand(createTableScript, connection);
+            var result = await createTableCommand.ExecuteNonQueryAsync() == -1;
+
+            _logger.LogInformation("Table creation script executed for table {TableName}.", contentType.Name);
+            return result;
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "SQL error occurred while creating table {TableName}.", contentType?.Name);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while creating table {TableName}.", contentType?.Name);
+            throw;
+        }
     }
 
     private string GenerateCreateSchemaScript(string schema)
     {
+        _logger.LogDebug("Generating CREATE SCHEMA script for schema {Schema}.", schema);
+
         return $@"
             IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
             BEGIN
@@ -43,8 +71,11 @@ public class DynamicTableService : IDynamicTableService
 
     private string GenerateCreateTableScript(Content content)
     {
+        _logger.LogDebug("Generating create table script for content {ContentName}.", content.Name);
+
         if (content.ContentFields == null || content.ContentFields.Count == 0)
         {
+            _logger.LogError("Content {ContentName} has no fields.", content.Name);
             throw new ArgumentException("Content must have at least one field.");
         }
 
@@ -77,6 +108,7 @@ public class DynamicTableService : IDynamicTableService
             sb.AppendLine(GeneratePivotTableScript(content.Name, field!));
         }
 
+        _logger.LogDebug("Create table script generated for table {TableName}.", content.Name);
         return sb.ToString();
     }
 
@@ -84,12 +116,16 @@ public class DynamicTableService : IDynamicTableService
     {
         ArgumentNullException.ThrowIfNull(field);
 
+        _logger.LogDebug("Generating field script for field {FieldName}.", field.Name);
+
         var generator = FieldScriptGeneratorFactory.GetFieldScriptGenerator(field.FieldType);
         return generator.GenerateFieldScript(field);
     }
 
     private string GeneratePivotTableScript(string contentName, ContentField field)
     {
+        _logger.LogDebug("Generating pivot table script for field {FieldName} in content {ContentName}.", field.Name, contentName);
+
         var pivotTableName = $"{contentName}{field.ReferenceTableName}";
         return $@"
             CREATE TABLE [{DomainShared.Constants.DynamicSchema}].[{pivotTableName}] (
