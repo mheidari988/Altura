@@ -4,41 +4,53 @@ using AlturaCMS.Domain.Entities;
 using AlturaCMS.Persistence.Context;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AlturaCMS.Application.Features.Contents.Commands.CreateContent
 {
     public class CreateContentHandler(
-        IContentTypeService contentTypeService,
+        IContentService contentTypeService,
         IDynamicTableService dynamicTableService,
-        IUnitOfWork<ApplicationDbContext> unitOfWork) : IRequestHandler<CreateContentCommand, CreateContentResponse>
+        IUnitOfWork<ApplicationDbContext> unitOfWork,
+        ILogger<CreateContentHandler> logger) : IRequestHandler<CreateContentCommand, CreateContentResponse>
     {
+        private readonly IContentService _contentTypeService = contentTypeService ?? throw new ArgumentNullException(nameof(contentTypeService));
+        private readonly IDynamicTableService _dynamicTableService = dynamicTableService ?? throw new ArgumentNullException(nameof(dynamicTableService));
+        private readonly IUnitOfWork<ApplicationDbContext> _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        private readonly ILogger<CreateContentHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
         public async Task<CreateContentResponse> Handle(CreateContentCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Handling CreateContentCommand for content: {ContentName}", request.Name);
+
+            // Step 1: Validate the request
             var validator = new CreateContentValidator();
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
+                _logger.LogWarning("Validation failed for content: {ContentName}. Errors: {ValidationErrors}", request.Name, validationResult.Errors);
                 throw new ValidationException(validationResult.Errors);
             }
 
-            await unitOfWork.BeginTransactionAsync();
-
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
-                // Step 1: Initialize the Content entity
+                // Step 2: Initialize the Content entity
                 var contentType = new Content
                 {
                     Name = request.Name,
                     ContentFields = [] // Initialize with an empty list
                 };
 
-                // Normalize string inputs
+                // Step 3: Normalize string inputs
                 NormalizeStringInputs(request);
 
                 // Add default metadata fields for content type
                 request.Fields.AddRange(ApplicationShared.GetDefaultFields());
 
-                // Step 2: Create ContentField entities and add them to the Content entity
+                _logger.LogDebug("Initialized content entity with {FieldCount} fields for content: {ContentName}", request.Fields.Count, request.Name);
+
+                // Step 4: Create ContentField entities and add them to the Content entity
                 foreach (var fieldDto in request.Fields)
                 {
                     var field = new ContentField
@@ -61,21 +73,28 @@ namespace AlturaCMS.Application.Features.Contents.Commands.CreateContent
                     contentType.ContentFields.Add(field);
                 }
 
-                // Step 3: Save the Content entity along with its associated ContentFields
-                var createdContentType = await contentTypeService.CreateAsync(contentType)
+                _logger.LogInformation("Attempting to create content with name: {ContentName}", request.Name);
+
+                // Step 5: Save the Content entity along with its associated ContentFields
+                var createdContentType = await _contentTypeService.CreateAsync(contentType)
                     ?? throw new Exception("Failed to create content type");
 
-                // Step 4: Create the dynamic table if the content type was created successfully
-                var isCreated = await dynamicTableService.CreateTableAsync(createdContentType);
+                _logger.LogInformation("Content created successfully with ID: {ContentId}", createdContentType.Id);
+
+                // Step 6: Create the dynamic table if the content type was created successfully
+                var isCreated = await _dynamicTableService.CreateTableAsync(createdContentType);
 
                 if (createdContentType != null && isCreated)
                 {
-                    await unitOfWork.CompleteAsync();
-                    await unitOfWork.CommitTransactionAsync();
+                    await _unitOfWork.CompleteAsync();
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    _logger.LogInformation("Dynamic table created successfully for content: {ContentName}", createdContentType.Name);
                 }
                 else
                 {
-                    await unitOfWork.RollbackTransactionAsync();
+                    await _unitOfWork.RollbackTransactionAsync();
+                    _logger.LogError("Transaction failed: either content type creation or table creation failed.");
                     throw new Exception("Transaction failed: either content type creation or table creation failed.");
                 }
 
@@ -84,27 +103,22 @@ namespace AlturaCMS.Application.Features.Contents.Commands.CreateContent
                     Id = createdContentType.Id,
                     Name = createdContentType.Name,
                     ContentFields = createdContentType.ContentFields
-                        .Where(f => !ApplicationShared.GetDefaultFields() // Filter out default fields from the response
+                        .Where(f => !ApplicationShared.GetDefaultFields()
                             .Any(df => df.Name == f.Name && df.DisplayName == f.DisplayName))
                         .Select(f => new ContentFieldDto
                         {
-                            FieldName = f.Name?.ToString() ?? string.Empty,
+                            FieldName = f.Name ?? string.Empty,
                         }).ToList()
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync();
+                _logger.LogError(ex, "An error occurred while handling CreateContentCommand for content: {ContentName}", request.Name);
                 throw;
             }
         }
 
-        /// <summary>
-        /// Normalize string inputs by trimming leading and trailing whitespace characters
-        /// </summary>
-        /// <param name="request">
-        /// The <see cref="CreateContentCommand"/> request object to normalize.
-        /// </param>
         private static void NormalizeStringInputs(CreateContentCommand request)
         {
             request.Name = request.Name.Trim();
