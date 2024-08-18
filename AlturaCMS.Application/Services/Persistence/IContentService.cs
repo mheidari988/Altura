@@ -2,7 +2,7 @@
 using AlturaCMS.Domain.Entities;
 
 namespace AlturaCMS.Application.Services.Persistence;
-public interface IContentTypeService : IBasePersistenceService<Content>
+public interface IContentService : IBasePersistenceService<Content>
 {
     // Add any additional methods specific to ContentTypeService here
 }

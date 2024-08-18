@@ -16,7 +16,7 @@ public static class DependencyInjection
             options.ConnectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException("Connection string not found");
         });
-        services.AddScoped<IContentTypeService, ContentTypeService>();
+        services.AddScoped<IContentService, ContentService>();
         services.AddScoped<IFieldService, FieldService>();
         services.AddScoped<IFormFieldService, FormFieldService>();
         services.AddScoped<IFormService, FormService>();
