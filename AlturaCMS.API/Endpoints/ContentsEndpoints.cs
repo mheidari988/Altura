@@ -4,9 +4,9 @@ using MediatR;
 
 namespace AlturaCMS.API.Endpoints;
 
-public static class ContentTypesEndpoints
+public static class ContentsEndpoints
 {
-    public static void MapContentTypesEndpoints(this IEndpointRouteBuilder endpoints)
+    public static void MapContentsEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapPost("/api/Contents", async (CreateContentCommand command, IMediator mediator, HttpContext context) =>
         {
@@ -26,6 +26,6 @@ public static class ContentTypesEndpoints
         {
             var result = await mediator.Send(new GetContentsQuery());
             return Results.Ok(result);
-        }).WithName("GetContentTypes").WithOpenApi();
+        }).WithName("GetContents").WithOpenApi();
     }
 }
