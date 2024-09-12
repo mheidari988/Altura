@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>{{ target_framework }}</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	{{ if nuget_references.size > 0 }}
+	<ItemGroup>
+		{{ for package in nuget_references }}
+		<PackageReference Include="{{ package.name }}" Version="{{ package.version }}" />
+		{{ end }}
+	</ItemGroup>
+	{{ end }}
+
+	{{ if project_references.size > 0 }}
+	<ItemGroup>
+		{{ for project in project_references }}
+		<ProjectReference Include="{{ project.path }}" />
+		{{ end }}
+	</ItemGroup>
+	{{ end }}
+
+</Project>
